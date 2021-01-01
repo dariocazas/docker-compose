@@ -1,0 +1,42 @@
+# mongo-express with standalone MongoDB 4.2 single node
+# Example based on 
+# - https://hub.docker.com/_/mongo/ 
+# - https://zgadzaj.com/development/docker/docker-compose/containers/mongodb
+
+# You can define the env vars in your system, or create a .env file 
+# (indluded in the repo) with the values
+
+version: "3.5"
+
+services:
+
+  mongo:
+    image: mongo:${MONGO_VERSION}
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      # To create new application database and credentials
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+      MONGO_INITDB_USERNAME: ${MONGO_INITDB_USERNAME}
+      MONGO_INITDB_PASSWORD: ${MONGO_INITDB_PASSWORD}
+
+    ports:
+      - 27017:27017
+    networks: 
+      - mongo-standalone
+    volumes:
+      - type: bind
+        # Aditional scripts to add (https://github.com/docker-library/mongo/blob/master/docker-entrypoint.sh#L230)
+        source: ./initdb.d
+        target: /docker-entrypoint-initdb.d
+      - type: volume
+        # Persist data between executions 
+        source: mongo-standalone_data
+        target: /data/db
+
+networks:
+  mongo-standalone:
+
+volumes:
+  mongo-standalone_data:
