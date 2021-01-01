@@ -1,0 +1,13 @@
+# Minimal spec to run mongo-express on localhost:8081 
+# https://github.com/mongo-express/mongo-express-docker/blob/master/docker-compose.yml
+
+# docker-compose -f "mongo/mongo-express/docker-compose-minimal.yml" up
+mongo:
+    image: mongo
+
+mongoexpress:
+    image: mongo-express
+    ports:
+        - "8081:8081"
+    links:
+        - mongo
