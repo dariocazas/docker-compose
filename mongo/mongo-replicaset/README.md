@@ -2,9 +2,9 @@
 
 Example with replicaSet, using three nodes:
 
-- mongo-0: node with higher priority to be primary
-- mongo-1: node usually as secondary
-- mongo-2: node usually as secondary
+- mongo-rs0-0: node with higher priority to be primary
+- mongo-rs0-1: node usually as secondary
+- mongo-rs0-2: node usually as secondary
 
 The docker-compose instante another service (mongo-setup)
 to enable the replicaSet. After do this, the container stop.
