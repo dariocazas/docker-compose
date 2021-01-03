@@ -1,0 +1,127 @@
+# mongo-express with standalone MongoDB 4.2 single node
+# Example based on 
+# - https://hub.docker.com/_/mongo/ 
+# - https://zgadzaj.com/development/docker/docker-compose/containers/mongodb
+# - https://zgadzaj.com/development/docker/docker-compose/turning-standalone-mongodb-server-into-a-replica-set-with-docker-compose
+
+# You can define the env vars in your system, or create a .env file 
+# (indluded in the repo) with the values
+
+# IMPORTANT: review rs0/README.md
+
+version: "3.5"
+
+services:
+
+  mongo-rs0-0:
+    image: mongo:${MONGO_VERSION}
+    hostname: mongo-rs0-0
+    container_name: mongo-rs0-0
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      # To create new application database and credentials
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+      MONGO_INITDB_USERNAME: ${MONGO_INITDB_USERNAME}
+      MONGO_INITDB_PASSWORD: ${MONGO_INITDB_PASSWORD}
+      MONGO_REPLICA_SET_NAME: ${MONGO_REPLICA_SET_NAME}
+      MONGO_REPLICA_SET_KEYFILE: ${MONGO_REPLICA_SET_KEYFILE}
+    expose:
+      - 27017
+    ports:
+      - 27017:27017
+    networks: 
+      - mongo-rs0-net
+    volumes:
+      - type: bind
+        # Aditional scripts to add (https://github.com/docker-library/mongo/blob/master/docker-entrypoint.sh#L230)
+        source: ./initdb.d
+        target: /docker-entrypoint-initdb.d
+      - type: volume
+        # Persist data between executions 
+        source: mongo-rs0-0-volume-data
+        target: /data/db
+      - type: bind
+        source: ./rs0
+        # Target should be like /var/mongodb/pki...
+        target: /data/pki
+#    healthcheck:
+#      test: test $$(echo "rs.initiate().ok || rs.status().ok" | mongo -u $${MONGO_INITDB_ROOT_USERNAME} -p $${MONGO_INITDB_ROOT_PASSWORD} --quiet) -eq 1
+#      interval: 10s
+#      start_period: 30s
+    command: ["--replSet", "${MONGO_REPLICA_SET_NAME}", "--keyFile", "${MONGO_REPLICA_SET_KEYFILE}", "--bind_ip_all"]
+
+  mongo-rs0-1:
+    image: mongo:${MONGO_VERSION}
+    hostname: mongo-rs0-1
+    container_name: mongo-rs0-1
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_REPLICA_SET_KEYFILE: ${MONGO_REPLICA_SET_KEYFILE}
+    expose:
+      - 27017
+    networks: 
+      - mongo-rs0-net
+    volumes:
+      - type: volume
+        # Persist data between executions 
+        source: mongo-rs0-1-volume-data
+        target: /data/db
+      - type: bind
+        source: ./rs0
+        # Target should be like /var/mongodb/pki...
+        target: /data/pki
+    command: ["--replSet", "${MONGO_REPLICA_SET_NAME}", "--keyFile", "${MONGO_REPLICA_SET_KEYFILE}", "--bind_ip_all"]
+
+  mongo-rs0-2:
+    image: mongo:${MONGO_VERSION}
+    hostname: mongo-rs0-2
+    container_name: mongo-rs0-2
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_REPLICA_SET_KEYFILE: ${MONGO_REPLICA_SET_KEYFILE}
+    expose:
+      - 27017
+    networks: 
+      - mongo-rs0-net
+    volumes:
+      - type: volume
+        # Persist data between executions 
+        source: mongo-rs0-2-volume-data
+        target: /data/db
+      - type: bind
+        source: ./rs0
+        # Target should be like /var/mongodb/pki...
+        target: /data/pki
+    command: ["--replSet", "${MONGO_REPLICA_SET_NAME}", "--keyFile", "${MONGO_REPLICA_SET_KEYFILE}", "--bind_ip_all"]
+
+  mongo-setup:
+    image: mongo:${MONGO_VERSION}
+    container_name: mongo-setup
+    restart: "no"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_REPLICA_SET_NAME: ${MONGO_REPLICA_SET_NAME}
+    depends_on:
+      - mongo-rs0-0
+      - mongo-rs0-1
+      - mongo-rs0-2
+    networks: 
+      - mongo-rs0-net
+    volumes: 
+      - ./post_scripts:/scripts
+    entrypoint: [ "bash", "/scripts/mongo_config_rs0.sh" ]
+
+networks:
+  mongo-rs0-net:
+
+volumes:
+  mongo-rs0-0-volume-data:
+  mongo-rs0-1-volume-data:
+  mongo-rs0-2-volume-data:

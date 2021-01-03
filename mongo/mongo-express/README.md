@@ -1,6 +1,3 @@
-TODO
-
-
 # mongo-express
 
 A web-based MongoDB admin interaface, available in 
