@@ -10,16 +10,16 @@ test environments.
         - MongoDB version
         - Admin user credentials
         - Database, credentials and roles to an application user
-- [mongo-replicaSet-minimal](./mongo-replicaSet-minimal): basic example
+- [mongo-replicaSet-minimal](./mongo-replicaset-minimal): basic example
   where initialize a three MongoDB containers configured as a replica-set
-- [mongo-replicaSet](./mongo-replicaSet): based on mongo-standalone example
+- [mongo-replicaSet](./mongo-replicaset): based on mongo-standalone example
   with:
     - Three MongoDB containers, running as a replica-set
-    - Using environemnt vars ([.env file](./mongo-replicaSet/.env)):
+    - Using environemnt vars ([.env file](./mongo-replicaset/.env)):
         - MongoDB version
         - ReplicaSet name
         - Admin user credentials
         - Database, credentials and roles to an application user
-    - Review documentation in [mongo-replicaSet](./mongo-replicaSet)
-      and [mongo-replicaSet/rs0](./mongo-replicaSet/rs0) for more detail
+    - Review documentation in [mongo-replicaSet](./mongo-replicaset)
+      and [mongo-replicaSet/rs0](./mongo-replicaset/rs0) for more detail
 
