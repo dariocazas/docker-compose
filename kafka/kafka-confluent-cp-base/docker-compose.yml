@@ -1,0 +1,131 @@
+# Copied and adapted from https://github.com/confluentinc/cp-docker-images/tree/5.3.3-post/examples/kafka-cluster-sasl
+
+---
+version: '2'
+services:
+
+  zookeeper-sasl-1:
+    image: confluentinc/cp-zookeeper:${CONFLUENT_VERSION}
+    network_mode: host
+    hostname: zookeeper-sasl-1
+    restart: unless-stopped
+    environment:
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_CLIENT_PORT: 22181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
+      KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/zookeeper_jaas.conf
+        -Dzookeeper.authProvider.1=org.apache.zookeeper.server.auth.SASLAuthenticationProvider
+        -Dzookeeper.quorum.auth.enableSasl=true
+        -Dzookeeper.quorum.auth.learnerRequireSasl=true
+        -Dzookeeper.quorum.auth.serverRequireSasl=true
+        -Dzookeeper.quorum.auth.learner.loginContext=QuorumLearner
+        -Dzookeeper.quorum.auth.server.loginContext=QuorumServer
+        -Dzookeeper.quorum.cnxn.threads.size=20
+        -Dzookeeper.requireClientAuthScheme=sasl
+    volumes:
+    - ${KAFKA_SASL_SECRETS_DIR}:/etc/kafka/secrets
+    network_mode: host
+    extra_hosts:
+      - "moby:127.0.0.1"
+
+
+  kafka-sasl-1:
+    image: confluentinc/cp-kafka:${CONFLUENT_VERSION}
+    network_mode: host
+    restart: unless-stopped
+    depends_on:
+      - zookeeper-sasl-1
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: localhost:22181
+      KAFKA_ADVERTISED_LISTENERS: SASL_PLAINTEXT://localhost:19094
+      KAFKA_SECURITY_INTER_BROKER_PROTOCOL: SASL_PLAINTEXT
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: SCRAM-SHA-512
+      KAFKA_SASL_ENABLED_MECHANISMS: SCRAM-SHA-512
+      KAFKA_LOG4J_ROOT_LOGLEVEL: WARN
+      KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/broker_jaas.conf
+    volumes:
+      - ${KAFKA_SASL_SECRETS_DIR}:/etc/kafka/secrets
+    extra_hosts:
+      - "moby:127.0.0.1"
+
+
+  kafka-sasl-2:
+    image: confluentinc/cp-kafka:${CONFLUENT_VERSION}
+    network_mode: host
+    restart: unless-stopped
+    depends_on:
+      - zookeeper-sasl-1
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: localhost:22181
+      KAFKA_ADVERTISED_LISTENERS: SASL_PLAINTEXT://localhost:29094
+      KAFKA_SECURITY_INTER_BROKER_PROTOCOL: SASL_PLAINTEXT
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: SCRAM-SHA-512
+      KAFKA_SASL_ENABLED_MECHANISMS: SCRAM-SHA-512
+      KAFKA_LOG4J_ROOT_LOGLEVEL: WARN
+      KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/broker_jaas.conf
+    volumes:
+      - ${KAFKA_SASL_SECRETS_DIR}:/etc/kafka/secrets
+    extra_hosts:
+      - "moby:127.0.0.1"
+
+
+  kafka-sasl-3:
+    image: confluentinc/cp-kafka:${CONFLUENT_VERSION}
+    network_mode: host
+    restart: unless-stopped
+    depends_on:
+      - zookeeper-sasl-1
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_ZOOKEEPER_CONNECT: localhost:22181
+      KAFKA_ADVERTISED_LISTENERS: SASL_PLAINTEXT://localhost:39094
+      KAFKA_SECURITY_INTER_BROKER_PROTOCOL: SASL_PLAINTEXT
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: SCRAM-SHA-512
+      KAFKA_SASL_ENABLED_MECHANISMS: SCRAM-SHA-512
+      KAFKA_LOG4J_ROOT_LOGLEVEL: WARN
+      KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/broker_jaas.conf
+    volumes:
+      - ${KAFKA_SASL_SECRETS_DIR}:/etc/kafka/secrets
+    extra_hosts:
+      - "moby:127.0.0.1"
+
+
+  kafka-sasl-4:
+    image: confluentinc/cp-kafka:${CONFLUENT_VERSION}
+    network_mode: host
+    #restart: unless-stopped
+    restart: "no"
+    depends_on:
+      - zookeeper-sasl-1
+    environment:
+      KAFKA_BROKER_ID: 4
+      KAFKA_ZOOKEEPER_CONNECT: localhost:22181
+      KAFKA_ADVERTISED_LISTENERS: SASL_PLAINTEXT://localhost:49094
+      KAFKA_SECURITY_INTER_BROKER_PROTOCOL: SASL_PLAINTEXT
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: SCRAM-SHA-512
+      KAFKA_SASL_ENABLED_MECHANISMS: SCRAM-SHA-512
+      KAFKA_LOG4J_ROOT_LOGLEVEL: WARN
+      KAFKA_OPTS: -Djava.security.auth.login.config=/etc/kafka/secrets/broker_jaas.conf
+    volumes:
+      - ${KAFKA_SASL_SECRETS_DIR}:/etc/kafka/secrets
+    extra_hosts:
+      - "moby:127.0.0.1"
+
+
+  kafka-sasl-setup:
+    image: confluentinc/cp-kafka:${CONFLUENT_VERSION}
+    network_mode: host
+    restart: "no"
+    depends_on:
+      - zookeeper-sasl-1
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: localhost:22181
+      KAFKA_USER: ${KAFKA_USER}
+      KAFKA_PASSWORD: ${KAFKA_PASSWORD}
+    volumes:
+      - ${KAFKA_SASL_SECRETS_DIR}:/etc/kafka/secrets
+    command: bash -c "/etc/kafka/secrets/kafka_users_init.sh"
