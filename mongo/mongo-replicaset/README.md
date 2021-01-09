@@ -11,17 +11,13 @@ to enable the replicaSet. After do this, the container stop.
 
 ## Run
 
-To prepare the first execution, is necesary run (review 
-[this](./rs0/README.md) for more detail)
+To prepare the first execution, is necesary create a keyfile
+and change his permissions (see [this](./rs0/README.md) for more detail).
+To simplicate this task, exist the [docker-run.sh] script: 
+if the keyfile doesn't exist, create it, assign the correct 
+permissions, and run the docker-compose.
 
-```sh
-# Permissions MUST BE set to 400
-chmod 400 mongo-rs0-keyfile
-# Inside of container, the user mongodb has 999 UID, guaranteed by https://github.com/docker-library/mongo/blob/master/4.0/Dockerfile#L4
-sudo chown 999 mongo-rs0-keyfile
-```
-
-After this, you can start the docker-compose as usual:
+The next executions, you can start the docker-compose as usual:
 
 ```sh
 docker-compose up

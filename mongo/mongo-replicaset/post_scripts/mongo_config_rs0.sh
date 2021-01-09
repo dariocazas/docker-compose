@@ -6,7 +6,7 @@ then
   rm -rf /var/lib/apt/lists/*
 fi
 
-sleep 5
+sleep 3s
 
 echo mongo_config_rs0.sh time now: `date +"%T" `
 
@@ -37,8 +37,10 @@ mongo --host "${MONGO0}:27017" -u "$MONGO_INITDB_ROOT_USERNAME" -p "$MONGO_INITD
     ]
   };
   rs.initiate(cfg, { force: true });
-  rs.reconfig(cfg, { force: true });
 EOF
+
+echo "Waiting 10s MongoDB replicaSet init as replicaSet..."
+sleep 10s
 
 mongo "mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@${MONGO0}:27017,${MONGO1}:27017,${MONGO2}:27017/?replicaSet=${MONGO_REPLICA_SET_NAME}" \
   --eval "rs.status()"
