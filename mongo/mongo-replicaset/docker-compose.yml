@@ -100,9 +100,9 @@ services:
         target: /data/pki
     command: ["--replSet", "${MONGO_REPLICA_SET_NAME}", "--keyFile", "${MONGO_REPLICA_SET_KEYFILE}", "--bind_ip_all"]
 
-  mongo-setup:
+  mongo-rs0-setup:
     image: mongo:${MONGO_VERSION}
-    container_name: mongo-setup
+    container_name: mongo-rs0-setup
     restart: "no"
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
