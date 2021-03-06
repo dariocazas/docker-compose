@@ -1,0 +1,25 @@
+# Copied and adapted from https://github.com/confluentinc/cp-docker-images/tree/5.3.3-post/examples/kafka-cluster-sasl
+
+version: '2'
+services:
+
+  control-center:
+    image: confluentinc/cp-enterprise-control-center:${CONFLUENT_VERSION}
+    hostname: control-center
+    container_name: control-center
+    ports:
+      - "9021:9021"
+    environment:
+      CONTROL_CENTER_BOOTSTRAP_SERVERS: ${KAFKA_BROKER}
+      CONTROL_CENTER_CONNECT_CLUSTER: ${KAFKA_CONNECT}
+      CONTROL_CENTER_KSQL_KSQLDB1_URL: ${KSQL}
+      CONTROL_CENTER_KSQL_KSQLDB1_ADVERTISED_URL: ${KSQL}
+      CONTROL_CENTER_SCHEMA_REGISTRY_URL: ${SCHEMA_REGISTRY}
+      CONTROL_CENTER_REPLICATION_FACTOR: 1
+      CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS: 1
+      CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
+      CONFLUENT_METRICS_TOPIC_REPLICATION: 1
+      PORT: 9021
+      JAVA_OPTS: "-Djava.security.auth.login.config=/etc/kafka/secrets/controlcenter_jaas.conf"
+    volumes:
+      - ${KAFKA_SASL_SECRETS_DIR}:/etc/kafka/secrets
